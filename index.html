@@ -44,6 +44,13 @@
             font-size: 24px;
             color: #666;
         }
+
+        #instructions {
+            margin-top: 10px;
+            color: #FF0000; /* Red color for emphasis */
+            font-size: 16px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -52,6 +59,7 @@
     </div>
     <p id="status">Waiting for location data...</p>
     <p id="mileage">Mileage: 0 miles</p>
+    <p id="instructions">Please allow location access for accurate speed tracking.</p>
 
     <script>
         let lastPosition = null;
@@ -70,6 +78,8 @@
         }
 
         function success(position) {
+            // Hide the instructions once access is granted
+            document.getElementById("instructions").style.display = "none";
             document.getElementById("status").innerText = "Tracking speed...";
 
             const currentPosition = {
@@ -98,7 +108,8 @@
         }
 
         function error(err) {
-            document.getElementById("status").innerText = "Location access denied.";
+            document.getElementById("status").innerText = "Location access denied. Please enable location services.";
+            document.getElementById("instructions").innerText = "Without location access, speed tracking will not work.";
             console.error(`ERROR(${err.code}): ${err.message}`);
         }
 
