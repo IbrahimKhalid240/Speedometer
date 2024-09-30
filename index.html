@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedometer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .speedometer {
+            text-align: center;
+            border: 5px solid #333;
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+        }
+
+        #speed {
+            font-size: 48px;
+            margin: 0;
+            color: #333;
+        }
+
+        #status {
+            margin-top: 20px;
+            color: #666;
+        }
+
+        #mileage {
+            margin-top: 10px;
+            font-size: 24px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="speedometer">
+        <h1 id="speed">0 mph</h1>
+    </div>
+    <p id="status">Waiting for location data...</p>
+    <p id="mileage">Mileage: 0 miles</p>
+
+    <script>
+        let lastPosition = null;
+        let lastTimestamp = null;
+        let totalDistance = 0; // Total distance in kilometers
+
+        if (navigator.geolocation) {
+            // Request position updates
+            navigator.geolocation.watchPosition(success, error, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+
+        function success(position) {
+            document.getElementById("status").innerText = "Tracking speed...";
+
+            const currentPosition = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                timestamp: position.timestamp
+            };
+
+            if (lastPosition && lastTimestamp) {
+                // Calculate distance using Haversine formula
+                const distance = haversineDistance(lastPosition, currentPosition);
+                totalDistance += distance / 1000; // Convert meters to kilometers
+                const timeElapsed = (currentPosition.timestamp - lastTimestamp) / 1000; // Time in seconds
+                const speedMph = (distance / timeElapsed) * 2.23694; // Speed in mph
+
+                // Update the speed display
+                document.getElementById("speed").innerText = `${Math.round(speedMph)} mph`;
+
+                // Update the mileage display
+                document.getElementById("mileage").innerText = `Mileage: ${(totalDistance * 0.621371).toFixed(2)} miles`; // Convert kilometers to miles
+            }
+
+            // Store the current position and timestamp for the next calculation
+            lastPosition = currentPosition;
+            lastTimestamp = currentPosition.timestamp;
+        }
+
+        function error(err) {
+            document.getElementById("status").innerText = "Location access denied.";
+            console.error(`ERROR(${err.code}): ${err.message}`);
+        }
+
+        function haversineDistance(pos1, pos2) {
+            const R = 6371e3; // Earth radius in meters
+            const lat1 = pos1.latitude * Math.PI / 180; // Convert degrees to radians
+            const lat2 = pos2.latitude * Math.PI / 180;
+            const deltaLat = (pos2.latitude - pos1.latitude) * Math.PI / 180;
+            const deltaLon = (pos2.longitude - pos1.longitude) * Math.PI / 180;
+
+            const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+                      Math.cos(lat1) * Math.cos(lat2) *
+                      Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            const distance = R * c; // Distance in meters
+            return distance; // Return distance in meters
+        }
+    </script>
+</body>
+</html>
