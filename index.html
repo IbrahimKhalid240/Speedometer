@@ -65,7 +65,7 @@
         let lastPosition = null;
         let lastTimestamp = null;
         let totalDistance = 0; // Total distance in kilometers
-        const speedThreshold = 0.5; // Speed threshold in mph to ignore small movements
+        const speedThreshold = 0.1; // Lower speed threshold in mph to capture more movement
 
         if (navigator.geolocation) {
             // Request position updates
@@ -96,11 +96,11 @@
                 const timeElapsed = (currentPosition.timestamp - lastTimestamp) / 1000; // Time in seconds
                 const speedMph = (distance / timeElapsed) * 2.23694; // Speed in mph
 
-                // Only update the speed display if it is above the threshold
+                // Update speed only if it exceeds the threshold
                 const displayedSpeed = speedMph < speedThreshold ? 0 : Math.round(speedMph);
                 document.getElementById("speed").innerText = `${displayedSpeed} mph`;
 
-                // Update the mileage display
+                // Update mileage display
                 document.getElementById("mileage").innerText = `Mileage: ${(totalDistance * 0.621371).toFixed(2)} miles`; // Convert kilometers to miles
             }
 
